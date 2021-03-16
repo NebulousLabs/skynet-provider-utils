@@ -4,8 +4,13 @@
 
 import { ChildHandshake, WindowMessenger } from "post-me";
 import type { Connection } from "post-me";
-import { emitStorageEvent, listenForStorageEvent, monitorOtherListener, ProviderMetadata, SkappInfo } from "skynet-interface-utils";
+import { defaultWindowTimeout, emitStorageEvent, listenForStorageEvent, monitorOtherListener, ProviderMetadata, SkappInfo } from "skynet-interface-utils";
 
+/**
+ * Base provider class that handles communication with the bridge.
+ *
+ * Note that implementers should implement required abstract methods in addition to a connector at the location specified by metadata.relativeConnectorPath.
+ */
 export abstract class BaseProvider<T> {
   isProviderConnected: boolean;
   methods: {
@@ -65,7 +70,7 @@ export abstract class BaseProvider<T> {
    *
    * 3. The provider sets the skapp as connected and successfully resolves the promise.
    */
-  protected async connectPopup(skappInfo: SkappInfo): Promise<void> {
+  protected async connectPopup(_skappInfo: SkappInfo): Promise<void> {
     // Event listener that waits for connection info from the connector.
     const { promise: promiseConnectionInfo, controller: controllerConnectionInfo } = listenForStorageEvent(
       "connector-connection-info"
@@ -76,7 +81,7 @@ export abstract class BaseProvider<T> {
     const { promise: promisePing, controller: controllerPing } = monitorOtherListener(
       "provider",
       "connector",
-      5000
+      defaultWindowTimeout
     );
 
     const promise: Promise<void> = new Promise(async (resolve, reject) => {
@@ -123,7 +128,7 @@ export abstract class BaseProvider<T> {
   }
 
   /**
-   * Tries to connect to the provider, only connecting if the user is already logged in to the provider.
+   * Tries to connect to the provider, only connecting if the user is already logged in to the provider in this browser and if the skapp is permissioned.
    */
   protected async connectSilent(skappInfo: SkappInfo): Promise<void> {
     // Check if user is connected already.
@@ -143,6 +148,9 @@ export abstract class BaseProvider<T> {
     this.isProviderConnected = true;
   }
 
+  /**
+   * Disconnects the provider by clearing any saved connection info.
+   */
   protected async disconnect(): Promise<void> {
     await this.clearConnectionInfo();
     this.isProviderConnected = false;
