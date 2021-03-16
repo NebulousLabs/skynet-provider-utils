@@ -32,7 +32,7 @@ export abstract class BaseProvider<T> {
     // Enable communication with parent skapp.
 
     const methods = {
-      callInterface: async (method: string) => this.callInterface(method),
+      call: async (method: string) => this.call(method),
       connectPopup: async (skappInfo: SkappInfo) => this.connectPopup(skappInfo),
       connectSilent: async (skappInfo: SkappInfo) => this.connectSilent(skappInfo),
       disconnect: async () => this.disconnect(),
@@ -50,13 +50,13 @@ export abstract class BaseProvider<T> {
   // Public Provider API
   // ===================
 
-  protected async callInterface(method: string): Promise<unknown> {
+  protected async call(method: string): Promise<unknown> {
     if (!this.isProviderConnected) {
-      throw new Error("Provider not connected, cannot access interface");
+      throw new Error("Provider not connected, cannot access dac");
     }
 
     if (!this.methods[method]) {
-      throw new Error(`Unimplemented interface method. Method: '${method}'`);
+      throw new Error(`Unimplemented schema method. Method: '${method}'`);
     }
     return this.methods[method]();
   }
