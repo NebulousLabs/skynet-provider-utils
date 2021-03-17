@@ -32,7 +32,7 @@ export abstract class BaseProvider<T> {
     // Enable communication with parent skapp.
 
     const methods = {
-      call: async (method: string, ...args: unknown[]) => this.call(method, args),
+      call: async (method: string, ...args: unknown[]) => this.call(method, ...args),
       connectPopup: async (skappInfo: SkappInfo) => this.connectPopup(skappInfo),
       connectSilent: async (skappInfo: SkappInfo) => this.connectSilent(skappInfo),
       disconnect: async () => this.disconnect(),
@@ -58,7 +58,7 @@ export abstract class BaseProvider<T> {
     if (!this.methods[method]) {
       throw new Error(`Unimplemented schema method. Method: '${method}'`);
     }
-    return this.methods[method](args);
+    return this.methods[method](...args);
   }
 
   /**
